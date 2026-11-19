@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Inconvenience Store</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: clamp(.75rem, 4vw, 3rem);
+      background: #f2f2f2;
+      color: #171717;
+      font: 1rem/1.5 system-ui, sans-serif;
+    }
+    main {
+      max-width: 56rem;
+      margin: auto;
+      padding: clamp(1rem, 4vw, 2rem);
+      border: 1px solid #ddd;
+      border-radius: 1.5rem;
+      background: #fff;
+    }
+    header, .bag { display: flex; justify-content: space-between; gap: 1rem; }
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: .35rem; margin: 1rem 0; }
+    .steps span { height: .3rem; border-radius: 1rem; background: #ddd; }
+    .steps .current { background: #454545; }
+    .intro { text-align: center; padding: 2rem 0; }
+    .intro h1, .shop h1 { line-height: 1.15; }
+    fieldset { border: 0; padding: 0; margin: 0 0 1.5rem; }
+    legend { font-weight: bold; margin-bottom: .5rem; }
+    label { display: block; padding: .45rem 0; cursor: pointer; }
+    input { accent-color: #171717; }
+    .shelf { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+    .card { border: 1px solid #ddd; border-radius: 1rem; padding: .85rem; }
+    .card:has(input:checked) { border-color: #444; background: #fafafa; }
+    .item-icon { display: block; text-align: center; font-size: 2rem; background: #efefef; border-radius: .6rem; }
+    .card h2 { font-size: 1.15rem; margin: .5rem 0 0; }
+    .card p { margin: 0; color: #505050; }
+    .bag { border-top: 1px solid #ddd; margin-top: 1.5rem; padding: 1rem 0; }
+    button {
+      width: 100%;
+      padding: .75rem 1rem;
+      border-radius: 2rem;
+      border: 1px solid #171717;
+      background: #171717;
+      color: white;
+      font: inherit;
+      cursor: pointer;
+    }
+    button:disabled { opacity: .5; cursor: default; }
+    .actions { display: grid; gap: .7rem; }
+    .receipt { border: 1px solid #ddd; border-radius: 1rem; padding: 1.25rem; margin-bottom: 1.5rem; }
+    .receipt ul { padding-left: 1.4rem; }
+    .receipt li { margin-block: .6rem; }
+    .benefits { text-align: center; }
+    .benefits ul { padding-inline: 0; list-style-position: inside; }
+    .story { max-width: 42rem; margin: 2rem auto; }
+    .story p { font-size: 1.1rem; line-height: 1.65; }
+    .story-art {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(.25rem, 3vw, 1.25rem);
+      min-height: 12rem;
+      border-radius: 1rem;
+      background: radial-gradient(ellipse at 50% 85%, #fff5cf, transparent 65%), #f1c894;
+      font-size: clamp(2.2rem, 9vw, 4.5rem);
+    }
+    .story-art[data-scene="train"] { background: linear-gradient(155deg, #d9f2ed, #8dbfca); }
+    .story-art span { filter: drop-shadow(0 .18em .12em #32232238); }
+    .story-art span:nth-child(odd) { transform: rotate(-9deg); }
+    .story-art span:nth-child(even) { transform: rotate(8deg); }
+    #unwrap { margin-top: 1rem; }
+    .gift-intro { text-align: center; margin-top: 2rem; }
+    .cart-art {
+      display: grid;
+      place-items: center;
+      width: 4.75rem;
+      height: 4.75rem;
+      margin: 0 auto 1rem;
+      border-radius: 50%;
+      background: #faead9;
+      font-size: 2.45rem;
+    }
+    .gift-stage {
+      display: grid;
+      place-items: center;
+      min-height: 16rem;
+      border-radius: 1rem;
+      background: radial-gradient(ellipse at 50% 77%, #d5ae88, transparent 44%), #fbefe1;
+      overflow: hidden;
+    }
+    .parcel { position: relative; width: 12rem; height: 9rem; margin-top: 2.25rem; }
+    .parcel-box, .parcel-lid {
+      position: absolute;
+      background: linear-gradient(112deg, #efc28e, #c68a57);
+      box-shadow: 0 .3rem .55rem #5e352e38;
+    }
+    .parcel-box { inset: 3.15rem .65rem .4rem; border-radius: 0 0 .35rem .35rem; }
+    .parcel-lid { inset: 2rem .2rem auto; height: 1.45rem; border-radius: .25rem; }
+    .parcel-ribbon {
+      position: absolute;
+      inset: 2rem auto .4rem 45%;
+      width: 10%;
+      background: linear-gradient(90deg, #821e39, #b33b55, #821e39);
+    }
+    .parcel-ribbon::before, .parcel-ribbon::after {
+      content: "";
+      position: absolute;
+      bottom: 98%;
+      width: 2.85rem;
+      height: 1.2rem;
+      border: .35rem solid #9b2947;
+    }
+    .parcel-ribbon::before { right: 45%; border-radius: 65% 65% 15% 65%; transform: rotate(18deg); }
+    .parcel-ribbon::after { left: 45%; border-radius: 65% 65% 65% 15%; transform: rotate(-18deg); }
+    .parcel-tag {
+      position: absolute;
+      right: .25rem;
+      top: 3.4rem;
+      padding: .2rem .45rem;
+      background: #fff5db;
+      color: #48282d;
+      border-radius: .15rem;
+      font-size: .85rem;
+      transform: rotate(-12deg);
+    }
+    .parcel-card {
+      position: absolute;
+      inset: 2.2rem 2rem auto;
+      height: 4.55rem;
+      display: grid;
+      place-items: center;
+      background: #fff7e4;
+      color: #992f4d;
+      border: .25rem double #bd815a;
+      border-radius: .25rem;
+      opacity: 0;
+      font-size: 2rem;
+    }
+    .unwrapped .parcel-ribbon, .unwrapped .parcel-tag { animation: loosen .35s ease both; }
+    .unwrapped .parcel-lid { animation: lift .45s .16s ease both; }
+    .unwrapped .parcel-card { animation: rise .5s .23s ease both; }
+    @keyframes loosen { to { transform: translate(2.3rem, .8rem) rotate(24deg); opacity: 0; } }
+    @keyframes lift { to { transform: translate(4rem, -2rem) rotate(20deg); } }
+    @keyframes rise { to { transform: translateY(-4.3rem) rotate(-7deg); opacity: 1; } }
+    .story-art[data-scene="diner"] {
+      position: relative;
+      min-height: clamp(12rem, 42vw, 20rem);
+      overflow: hidden;
+      align-items: start;
+      padding-top: 1.6rem;
+      background:
+        linear-gradient(transparent 70%, #522e43 70% 76%, #301e36 76%),
+        repeating-linear-gradient(0deg, #ffffff14 0 1px, transparent 1px 2.5rem),
+        repeating-linear-gradient(90deg, #ffffff14 0 1px, transparent 1px 4rem),
+        radial-gradient(ellipse at 50% 20%, #7d3f58, #2c203c 75%);
+    }
+    .story-art .neon {
+      padding: .18em .5em;
+      border: .07em solid #ffc4dd;
+      border-radius: .2em;
+      color: #fff1f7;
+      font-size: clamp(1.8rem, 8vw, 4rem);
+      letter-spacing: .1em;
+      line-height: 1.15;
+      text-shadow: 0 0 .25em #ff448d;
+      box-shadow: 0 0 .35em #ff649c, inset 0 0 .25em #ff649c;
+    }
+    .kitchen-sink {
+      position: absolute;
+      bottom: 21%;
+      width: min(45%, 11rem);
+      height: 12%;
+      border-radius: .15rem .15rem 1.5rem 1.5rem;
+      background: linear-gradient(#bab6cd, #504b67);
+      border-top: .2rem solid #e4dfea;
+    }
+    .kitchen-sink::before {
+      content: "";
+      position: absolute;
+      left: 47%;
+      bottom: 100%;
+      width: 1.6rem;
+      height: 1.65rem;
+      border: .24rem solid #cfc8da;
+      border-right: 0;
+      border-bottom: 0;
+      border-radius: 1.5rem 0 0 0;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .unwrapped .parcel-ribbon, .unwrapped .parcel-tag, .unwrapped .parcel-lid, .unwrapped .parcel-card {
+        animation-delay: 0s;
+        animation-duration: .01s;
+      }
+    }
+    button.secondary { background: white; color: #171717; }
+    :focus-visible { outline: 3px solid #315b99; outline-offset: 3px; }
+    @media (max-width: 36rem) { .shelf { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <strong><span aria-hidden="true">🏪</span> The Inconvenience Store</strong>
+      <span id="step">01 / 04</span>
+    </header>
+    <div class="steps" aria-hidden="true">
+      <span class="current"></span><span></span><span></span><span></span>
+    </div>
+
+    <section id="welcome" aria-labelledby="welcome-title">
+      <div class="intro">
+        <h1 id="welcome-title" tabindex="-1">Welcome to the Inconvenience Store</h1>
+        <p><strong>Small efforts. Unexpected joys.</strong></p>
+        <p>Shop for the little hassles you’ve learned to avoid. You never know what comes with them.</p>
+      </div>
+      <fieldset>
+        <legend>How’s your day going?</legend>
+        <label><input type="radio" name="pace" value="busy" checked> Busy — Lots to do</label>
+        <label><input type="radio" name="pace" value="relaxed"> Relaxed — No rush</label>
+      </fieldset>
+      <button type="button" id="enter">Enter Store</button>
+    </section>
+
+    <section class="shop" id="shop" aria-labelledby="shop-title" hidden>
+      <h1 id="shop-title" tabindex="-1">Shop a Little Inconvenience</h1>
+      <p id="shop-intro"></p>
+      <p>Choose up to three everyday inconveniences.</p>
+      <div class="shelf" id="shelf"></div>
+      <div class="bag">
+        <strong>Your Shopping Bag</strong>
+        <span id="bag-count" role="status">0 / 3 items</span>
+      </div>
+      <div class="actions">
+        <button type="button" id="checkout" disabled>Checkout</button>
+        <button type="button" id="back" class="secondary">Back to Welcome</button>
+      </div>
+    </section>
+
+    <section id="receipt" hidden>
+      <div id="order-review" role="region" aria-labelledby="review-title">
+        <div class="intro">
+          <h1 id="review-title" tabindex="-1">Review Your Order</h1>
+          <p>Check what each item will cost in time or effort.</p>
+        </div>
+        <div class="receipt">
+          <h2>Order Summary</h2>
+          <ul id="order-items"></ul>
+          <p><strong>Total cost</strong><br>A little time &amp; effort</p>
+        </div>
+        <div class="actions">
+          <button type="button" id="purchase">Place Order</button>
+          <button type="button" id="edit" class="secondary">Back to Shop</button>
+        </div>
+      </div>
+
+      <div id="confirmation" role="region" aria-labelledby="receipt-title" hidden>
+        <div class="intro">
+          <h1 id="receipt-title" tabindex="-1">Thank You for Your Purchase!</h1>
+        </div>
+        <div class="receipt benefits">
+          <span class="cart-art" aria-hidden="true">🛒</span>
+          <h2>Here’s what your choices made room for</h2>
+          <ul id="benefits"></ul>
+        </div>
+        <h2 class="gift-intro">A little something came with your order</h2>
+        <div class="gift-stage">
+          <div id="parcel" class="parcel" role="img" aria-label="Kraft-paper gift box with a red ribbon and a tag that reads For your day">
+            <div class="parcel-card" aria-hidden="true">✦</div>
+            <div class="parcel-box"></div>
+            <div class="parcel-lid"></div>
+            <div class="parcel-ribbon"></div>
+            <span class="parcel-tag" aria-hidden="true">For your day</span>
+          </div>
+        </div>
+        <button type="button" id="unwrap">Untie the Ribbon</button>
+        <div id="fortune-status" role="status"></div>
+      </div>
+    </section>
+
+    <section id="story" aria-labelledby="story-title" hidden>
+      <div class="intro">
+        <h1 id="story-title" tabindex="-1">Your Day, Your Story</h1>
+        <p>A little story that wasn’t on your schedule.</p>
+      </div>
+      <article class="story">
+        <h2 id="ending-title"></h2>
+        <p id="ending-setup" hidden></p>
+        <div id="ending-art" class="story-art" aria-hidden="true"></div>
+        <div id="ending-text"></div>
+      </article>
+      <button type="button" id="return" class="secondary">Back to Receipt</button>
+    </section>
+  </main>
+  <script src="store.js"></script>
+</body>
+</html>
